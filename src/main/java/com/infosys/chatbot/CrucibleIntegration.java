@@ -10,6 +10,8 @@ import java.net.URLConnection;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 public class CrucibleIntegration {
 	public static void main(String[] args) {
 		try{
@@ -25,8 +27,23 @@ public class CrucibleIntegration {
 			//System.out.println(body);
 			Document doc = Jsoup.connect("https://github.com/Padmaja7/newApp/commits/master").get();
 			//System.out.println(doc.select(".commit-title a"));
-			System.out.println("Commit Information :"+ doc.getElementsByClass("message").text());
-			System.out.println("Committed by :"+ doc.getElementsByClass("user-mention").text());
+			//Elements contents = doc.getElementsByClass("message");			
+			Elements contents = doc.select(".commits-list-item");
+			int i=0;
+			for(Element content: contents)
+			{
+				System.out.println("Commit Message :"+ content.getElementsByClass("message").text());
+				System.out.println("Committed by :"+ content.getElementsByClass("user-mention").text());				
+				System.out.println("Commit ID :"+ content.getElementsByClass("sha").text());
+				String path="https://github.com"+content.getElementsByClass("sha").attr("href");
+				Document commitDoc=Jsoup.connect(path).get();
+				System.out.println("Chnaged Files Count :"+ commitDoc.getElementsByClass("js-details-target").text().split("changed")[0]);
+				i=i+1;
+				if(i>0)
+				{
+					break;
+				}
+			}	
 			System.out.println("Committed at :"+ doc.getElementsByClass("commit-group-title").text().split("on")[1]);
 		}
 		catch (Exception e) {
